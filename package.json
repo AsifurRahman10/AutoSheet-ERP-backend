@@ -5,12 +5,13 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "DOTENV_CONFIG_QUIET=true nodemon --quiet --experimental-json-modules src/index.js"
+    "dev": "cross-env DOTENV_CONFIG_QUIET=true nodemon --quiet --experimental-json-modules src/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@supabase/supabase-js": "^2.75.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
@@ -21,5 +22,8 @@
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "npm": "^11.6.1"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
   }
 }
