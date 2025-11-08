@@ -1,29 +1,26 @@
 import { User } from '../models/user.models.js'
 
 const createUserService = async ({ userData, creatorId, organizationID }) => {
-  const {
-    fullName: name,
-    email,
-    phone: phoneNumber,
-    gender,
-    designation,
-    staffId,
-    profilePicture,
-  } = userData
-  console.log(userData)
   const createUser = await User.create({
-    name,
-    email,
-    phoneNumber,
-    gender,
-    designation,
-    staffId,
-    profilePicture,
+    name: userData.name,
+    email: userData.email,
+    phoneNumber: userData.phone,
+    gender: userData.gender,
+    designation: userData.designation,
+    staffId: userData.staffId,
+    profilePicture: userData.profilePicture,
     organizationID,
     creator_id: creatorId,
   })
-  console.log(createUser)
   return createUser
 }
 
-export { createUserService }
+const getAllUsersService = async (email) => {
+  const orgId = (
+    await User.findOne({ email: email }).select('organizationID').lean()
+  ).organizationID
+  const users = await User.find({ organizationID: orgId }).lean()
+  return users
+}
+
+export { createUserService, getAllUsersService }

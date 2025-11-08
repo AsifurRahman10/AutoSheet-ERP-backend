@@ -1,7 +1,11 @@
-import { createUserService } from '../services/user.service.js'
+import {
+  createUserService,
+  getAllUsersService,
+} from '../services/user.service.js'
 import { User } from '../models/user.models.js'
 import { ApiError } from '../utils/ApiError.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
+import ApiResponse from '../utils/ApiResponse.js'
 
 const registerUser = asyncHandler(async (req, res) => {
   const userData = req.body
@@ -31,7 +35,18 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'User registration failed')
   }
   // Registration logic here
-  res.status(201).json({ message: 'User registered successfully' })
+  res.status(201).json(new ApiResponse(201, 'User registered successfully'))
 })
 
-export { registerUser }
+const getAllUsers = asyncHandler(async (req, res) => {
+  const userEmail = req.body.email
+  const allUsers = await getAllUsersService(userEmail)
+  if (!allUsers && allUsers.length === 0) {
+    throw new ApiError(404, 'No users found')
+  }
+  res
+    .status(200)
+    .json(new ApiResponse(200, allUsers, 'Users retrieved successfully'))
+})
+
+export { registerUser, getAllUsers }
