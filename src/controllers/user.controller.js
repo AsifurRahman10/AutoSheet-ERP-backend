@@ -39,8 +39,15 @@ const registerUser = asyncHandler(async (req, res) => {
 })
 
 const getAllUsers = asyncHandler(async (req, res) => {
-  const userEmail = req.body.email
-  const allUsers = await getAllUsersService(userEmail)
+  const { search = '', filter = {}, page = 1, limit = 8 } = req.query
+  const userEmail = req?.user?.user?.email
+  const allUsers = await getAllUsersService(
+    userEmail,
+    search,
+    filter,
+    page,
+    limit
+  )
   if (!allUsers && allUsers.length === 0) {
     throw new ApiError(404, 'No users found')
   }
