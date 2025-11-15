@@ -4,6 +4,7 @@ const createUserService = async ({ userData, creatorId, organizationID }) => {
   const createUser = await User.create({
     name: userData.name,
     email: userData.email,
+    role: userData.role,
     phoneNumber: userData.phone,
     gender: userData.gender,
     designation: userData.designation,
@@ -15,15 +16,10 @@ const createUserService = async ({ userData, creatorId, organizationID }) => {
   return createUser
 }
 
-const getAllUsersService = async (email, search, filter, page, limit) => {
+const getAllUsersService = async (orgId, search, filter, page, limit) => {
   const searchText = search?.trim() || ''
   const roleFilter = filter?.trim() || ''
-  const orgId = (
-    await User.findOne({ email: email }).select('organizationID').lean()
-  ).organizationID
-  if (!orgId) {
-    throw new ApiError(404, 'Organization not found')
-  }
+
   const skip = (page - 1) * limit
   const query = { organizationID: orgId }
 
@@ -41,7 +37,6 @@ const getAllUsersService = async (email, search, filter, page, limit) => {
   }
   const totalUsers = await User.countDocuments(query)
   const users = await User.find(query).skip(skip).limit(limit).lean()
-  console.log(users)
   return {
     total: totalUsers,
     page: Number(page),
@@ -51,4 +46,12 @@ const getAllUsersService = async (email, search, filter, page, limit) => {
   }
 }
 
-export { createUserService, getAllUsersService }
+const getUserDataService = async (userId) => {
+  const user = await User.findById(userId).lean()
+  if (!user) {
+    throw new ApiError(404, 'User not found')
+  }
+  return user
+}
+
+export { createUserService, getAllUsersService, getUserDataService }

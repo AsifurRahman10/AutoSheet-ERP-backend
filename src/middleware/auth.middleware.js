@@ -1,5 +1,6 @@
 import { ApiError } from '../utils/ApiError.js'
 import { supabase } from '../utils/supabaseClient.js'
+import { User } from '../models/user.models.js'
 
 const verifyAuth = async (req, res, next) => {
   try {
@@ -15,7 +16,14 @@ const verifyAuth = async (req, res, next) => {
       return res.status(401).json({ message: 'Invalid or expired token' })
     }
 
-    req.user = user
+    const mongoUser = await User.findOne({ supabase_uid: user.email })
+      .select('_id organizationID role')
+      .lean()
+
+    req.user = {
+      ...user.user,
+      ...mongoUser,
+    }
     next()
   } catch (error) {
     console.error(error)

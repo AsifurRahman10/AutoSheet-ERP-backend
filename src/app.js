@@ -57,10 +57,12 @@ app.use(cookieParser())
 import sessionRouter from './routes/session.route.js'
 import uploadRouter from './routes/upload.route.js'
 import userRoute from './routes/user.route.js'
+import extractRoute from './routes/extract.route.js'
 
 // router declaration
 app.use('/api/v1/auth', sessionRouter)
 app.use('/api/v1/upload', uploadRouter)
 app.use('/api/v1/user', userRoute)
+app.use('/api/v1/extract', extractRoute)
 
 export { app }

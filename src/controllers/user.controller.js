@@ -1,6 +1,7 @@
 import {
   createUserService,
   getAllUsersService,
+  getUserDataService,
 } from '../services/user.service.js'
 import { User } from '../models/user.models.js'
 import { ApiError } from '../utils/ApiError.js'
@@ -9,24 +10,17 @@ import ApiResponse from '../utils/ApiResponse.js'
 
 const registerUser = asyncHandler(async (req, res) => {
   const userData = req.body
-  const creator = userData.creator
-  const checkCreatorAccess = await User.findOne({ email: creator })
-  const creatorId = checkCreatorAccess ? checkCreatorAccess._id : null
-  const organizationID = checkCreatorAccess
-    ? checkCreatorAccess.organizationID
-    : null
-  if (
-    !checkCreatorAccess ||
-    (checkCreatorAccess.role !== 'admin' &&
-      checkCreatorAccess.role !== 'manager')
-  ) {
+  const checkCreatorAccess = req.user.role === 'admin'
+  if (!checkCreatorAccess) {
     throw new ApiError(
       403,
       'Forbidden: You do not have permission to create users'
     )
   }
+  const creatorId = req.user._id
+  const organizationID = req.user.organizationID
 
-  const existingUser = await User.findOne({ email: userData.email })
+  const existingUser = await getUserDataService(userData.email)
   if (existingUser) {
     throw new ApiError(400, 'User with this email already exists')
   }
@@ -40,14 +34,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const getAllUsers = asyncHandler(async (req, res) => {
   const { search = '', filter = {}, page = 1, limit = 8 } = req.query
-  const userEmail = req?.user?.user?.email
-  const allUsers = await getAllUsersService(
-    userEmail,
-    search,
-    filter,
-    page,
-    limit
-  )
+  const orgId = req?.user?.organizationID
+  const allUsers = await getAllUsersService(orgId, search, filter, page, limit)
   if (!allUsers && allUsers.length === 0) {
     throw new ApiError(404, 'No users found')
   }
@@ -56,4 +44,15 @@ const getAllUsers = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, allUsers, 'Users retrieved successfully'))
 })
 
-export { registerUser, getAllUsers }
+const getUserData = asyncHandler(async (req, res) => {
+  const userId = req.params.id
+  if (!userId) {
+    throw new ApiError(404, 'User ID is required')
+  }
+  const user = await getUserDataService(userId)
+  res
+    .status(200)
+    .json(new ApiResponse(200, user, 'User retrieved successfully'))
+})
+
+export { registerUser, getAllUsers, getUserData }
